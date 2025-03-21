@@ -20,7 +20,7 @@ def handle_query():
 
     if not user_query:
         return jsonify({"error": "No query provided"}), 400
-
+    print(f"Received query: {user_query}")  
     processed_query = preprocess_text(user_query)
 
     try:
