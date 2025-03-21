@@ -1,17 +1,41 @@
 "use client";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import { Send } from "lucide-react";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+
 
 const Main = () => {
   const [isRecording, setIsRecording] = useState(false);
 
   const toggleRecording = () => {
     setIsRecording(!isRecording);
+  
+    if (!isRecording) {
+      // Start listening
+      SpeechRecognition.startListening({ continuous: true, language: 'en-IN' });
+    } else {
+      // Stop listening
+      SpeechRecognition.stopListening();
+      console.log(transcript);
+    }
+    
   };
+  
+    const [textInput, setTextInput] = useState('');  // To store the transcript or manual input
+    const startListening = () => SpeechRecognition.startListening({ continuous: true, language: 'en-IN' });
+    const { transcript, browserSupportsSpeechRecognition } = useSpeechRecognition();
+
+    if (!browserSupportsSpeechRecognition) {
+        return null
+    }
+
+useEffect(() => {
+  setTextInput(transcript);
+}, [transcript]);  // Whenever the transcript updates, update the text area
 
   return (
     <div className="w-full py-16 px-6 md:px-12">
@@ -31,12 +55,12 @@ const Main = () => {
                       height: `${100 + i * 40}px`,
                     }}
                     initial={{ scale: 1, opacity: 0.6 }}
-                    animate={{ scale: 2, opacity: 0 }}
+                    animate={{ scale: 2, opacity: 9 }}
                     transition={{
                       duration: 1.8,
                       repeat: Infinity,
                       ease: "easeInOut",
-                      delay: i * 0.4,
+                      delay: i * 0.2,
                     }}
                   />
                 ))}
@@ -100,6 +124,8 @@ const Main = () => {
             </h3>
             <div className="relative">
               <Textarea
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)} 
                 placeholder="Type your message to Zuhi here..."
                 className="min-h-[400px] text-lg text-gray-700 bg-white border border-blue-600 rounded-lg p-4 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all duration-300"
               />
