@@ -11,8 +11,21 @@ import SpeechRecognition, {
 
 const Main = () => {
   const [isRecording, setIsRecording] = useState(false);
+  const [textInput, setTextInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const toggleRecording = () => {
+  const { transcript, browserSupportsSpeechRecognition, resetTranscript } =
+    useSpeechRecognition();
+
+  useEffect(() => {
+    setTextInput(transcript);
+  }, [transcript]); // Update textarea with transcript
+
+  if (!browserSupportsSpeechRecognition) {
+    return <p>Your browser does not support speech recognition.</p>;
+  }
+
+  const toggleRecording = async () => {
     setIsRecording(!isRecording);
 
     if (!isRecording) {
@@ -21,23 +34,33 @@ const Main = () => {
     } else {
       // Stop listening
       SpeechRecognition.stopListening();
-      console.log(textInput);
+      sendToBackend(textInput); // Send the recorded text to the backend
     }
   };
 
-  const [textInput, setTextInput] = useState(""); // To store the transcript or manual input
-  const startListening = () =>
-    SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
-  const { transcript, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
+  const sendToBackend = async (text) => {
+    if (!text.trim()) return; // Prevent empty requests
 
-  if (!browserSupportsSpeechRecognition) {
-    return null;
-  }
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://127.0.0.1:5000/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: text }),
+      });
 
-  useEffect(() => {
-    setTextInput(transcript);
-  }, [transcript]); // Whenever the transcript updates, update the text area
+      const data = await response.json();
+      console.log("Backend Response:", data);
+
+      if (data.response) {
+        setTextInput(data.response); // Update text area with AI response
+      }
+    } catch (error) {
+      console.error("Error sending data to backend:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="w-full py-16 px-6 md:px-12">
@@ -45,7 +68,7 @@ const Main = () => {
         {/* Left side with image and button */}
         <div className="md:w-1/3 flex flex-col items-center">
           <div className="relative flex justify-center items-center">
-            {/* Sound propagation waves fix */}
+            {/* Sound propagation waves */}
             {isRecording && (
               <div className="absolute inset-0 flex justify-center items-center z-10">
                 {[...Array(3)].map((_, i) => (
@@ -57,7 +80,7 @@ const Main = () => {
                       height: `${100 + i * 40}px`,
                     }}
                     initial={{ scale: 1, opacity: 0.6 }}
-                    animate={{ scale: 2, opacity: 9 }}
+                    animate={{ scale: 2, opacity: 0 }}
                     transition={{
                       duration: 1.8,
                       repeat: Infinity,
@@ -69,7 +92,7 @@ const Main = () => {
               </div>
             )}
 
-            {/* The image container with hover animation */}
+            {/* Image container */}
             <motion.div
               className="relative w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg z-20"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -107,7 +130,7 @@ const Main = () => {
                 className="w-8 h-8 object-contain z-10"
               />
               <span className="relative z-10">
-                {isRecording ? "Stop " : "Start Talking"}
+                {isRecording ? "Stop" : "Start Talking"}
               </span>
             </Button>
           </motion.div>
@@ -131,8 +154,15 @@ const Main = () => {
                 placeholder="Type your message to Zuhi here..."
                 className="min-h-[400px] text-lg text-gray-700 bg-white border border-blue-600 rounded-lg p-4 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all duration-300"
               />
-              <button className="absolute bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all">
-                <Send size={24} />
+              <button
+                onClick={() => sendToBackend(textInput)}
+                className="absolute bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Send size={24} />
+                )}
               </button>
             </div>
             <Separator className="w-full my-6" />

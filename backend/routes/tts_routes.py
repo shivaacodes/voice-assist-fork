@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, send_file
-from services.tts import generate_tts
+from services.tts_service import generate_tts
+import os
 
 tts_bp = Blueprint('tts', __name__)
 
@@ -17,7 +18,8 @@ def text_to_speech():
 
     output_file = generate_tts(text)
 
-    if "Error" in output_file or "Exception" in output_file:
-        return jsonify({"error": output_file}), 500
+    # Ensure the file was generated successfully
+    if not os.path.exists(output_file):
+        return jsonify({"error": "Failed to generate speech. Please try again."}), 500
 
     return send_file(output_file, as_attachment=True)
