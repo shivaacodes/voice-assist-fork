@@ -1,38 +1,77 @@
-import requests
+import atexit
 import os
-import uuid
-from config import HUME_API_KEY, TTS_OUTPUT_FOLDER
+import asyncio
+import base64
+from pathlib import Path
+from hume import AsyncHumeClient
+from hume.tts import PostedUtterance
+from dotenv import load_dotenv
 
-# Hume API endpoint
-HUME_TTS_URL = "https://api.hume.ai/v0/tts"
+load_dotenv()
 
-# Ensure the output folder exists
+# Initialize Hume client
+HUME_API_KEY = os.getenv("HUME_API_KEY")
+if not HUME_API_KEY:
+    raise EnvironmentError("HUME_API_KEY not found in environment variables")
+hume = AsyncHumeClient(api_key=HUME_API_KEY)
 
-def generate_tts(text):
-    """
-    Convert text to speech using Hume API and return audio data as bytes.
-    """
-    headers = {
-        "Authorization": f"Bearer {HUME_API_KEY}",
-        "Content-Type": "application/json"
-    }
+# Output directory configuration
+TTS_OUTPUT_FOLDER = Path("static/tts_output")
+TTS_OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
-    data = {
-        "text": text,
-        "voice": "female-executive",  # Professional female voice
-        "sample_rate": 24000  # High-quality audio
-    }
+# Create a single event loop that persists
+loop = asyncio.get_event_loop()
+if loop.is_closed():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
+
+async def generate_tts_async(text: str) -> str:
+    """Generates TTS audio from text and returns the file path"""
     try:
-        response = requests.post(HUME_TTS_URL, json=data, headers=headers)
+        # Generate speech with a female assistant-like voice
+        speech = await hume.tts.synthesize_json(
+            utterances=[
+                PostedUtterance(
+                    description="A calm, professional female assistant",  # Updated voice description
+                    text=text,
+                )
+            ],
+            num_generations=1,
+        )
 
-        if response.status_code == 200:
-            # Return audio data directly in bytes
-            return response.content
-        else:
-            # Return error message as bytes for logging
-            return f"Error: {response.json().get('message', 'Unknown error')}".encode()
+        # Save the audio
+        audio_data = speech.generations[0].audio
+        audio_filename = f"tts_{int(os.times().elapsed)}.wav"
+        audio_path = TTS_OUTPUT_FOLDER / audio_filename
 
-    except requests.exceptions.RequestException as e:
-        # Return exception message as bytes for logging
-        return f"Exception: {str(e)}".encode()
+        with open(audio_path, "wb") as f:
+            f.write(base64.b64decode(audio_data))
+
+        return str(audio_path)
+
+    except Exception as e:
+        raise Exception(f"TTS generation error: {str(e)}")
+
+
+def generate_tts(text: str) -> str:
+    """Synchronous wrapper for async TTS generation"""
+    if not text:
+        raise ValueError("Text input is required")
+
+    # Use the existing event loop
+    try:
+        return loop.run_until_complete(generate_tts_async(text))
+    except Exception as e:
+        raise e
+
+# Cleanup function to close the loop when the application exits
+
+
+def cleanup():
+    if not loop.is_closed():
+        loop.close()
+
+
+# Register cleanup when the application exits
+atexit.register(cleanup)

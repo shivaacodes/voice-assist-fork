@@ -32,9 +32,11 @@ const Main = () => {
       // Start listening
       SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
     } else {
-      // Stop listening
+      // Stop listening and send the query
       SpeechRecognition.stopListening();
-      // Removed the sendToBackend call from here
+      if (transcript.trim()) {
+        await sendToBackend(transcript);
+      }
     }
   };
 
@@ -49,14 +51,21 @@ const Main = () => {
         body: JSON.stringify({ query: text }),
       });
 
-      const data = await response.json();
-      console.log("Backend Response:", data);
+      if (!response.ok) {
+        throw new Error("Failed to fetch response from backend");
+      }
 
-      if (data.response) {
-        setTextInput(data.response); // Update text area with AI response
+      const data = await response.json();
+      if (data.response && data.audio) {
+        setTextInput(data.response); // Display the text response in the textarea
+        const audio = new Audio(data.audio); // Play the base64 audio
+        audio.play();
+      } else if (data.error) {
+        setTextInput(data.error);
       }
     } catch (error) {
       console.error("Error sending data to backend:", error);
+      setTextInput("Sorry, something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -157,6 +166,7 @@ const Main = () => {
               <button
                 onClick={() => sendToBackend(textInput)}
                 className="absolute bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all flex items-center justify-center"
+                disabled={isLoading}
               >
                 {isLoading ? (
                   <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
