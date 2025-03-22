@@ -19,35 +19,34 @@ const AiFeature = () => {
     },
   ];
 
-  // Function to generate and download the PDF
   const generatePDF = () => {
     const doc = new jsPDF();
 
-    // Add content to the PDF (customize this later as per your logic)
     doc.setFontSize(16);
     doc.text("Chat Transcript", 10, 10);
 
-    let yPosition = 20; // Starting Y position for messages
+    let yPosition = 20;
     messages.forEach((message) => {
       doc.text(`${message.sender}: ${message.text}`, 10, yPosition);
-      yPosition += 10; // Increment Y position for the next line
+      yPosition += 10;
     });
 
-    // Save the PDF with a filename
     doc.save("chat-transcript.pdf");
 
-    // Placeholder for additional logic you mentioned
     console.log("PDF generated. Add your custom logic here later.");
   };
 
   return (
     <div className="flex flex-col items-center w-full bg-transparent p-4">
       <div className="w-full max-w-6xl">
-        <h2 className="text-[3rem] md:text-[3.5rem] lg:text-[6rem] font-bold text-blue-700 text-center mb-8">
+        <h2
+          className="text-[3rem] md:text-[3.5rem] lg:text-[6rem] font-bold text-center mb-8 
+  bg-gradient-to-r from-blue-400 via-blue-600 to-blue-800 bg-clip-text text-transparent 
+  animate-gradient"
+        >
           Generate Application
         </h2>
 
-        {/* Chat Box */}
         <div className="flex flex-col space-y-8">
           {messages.map((message, index) => (
             <div
