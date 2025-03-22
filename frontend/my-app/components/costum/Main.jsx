@@ -34,7 +34,7 @@ const Main = () => {
     } else {
       // Stop listening
       SpeechRecognition.stopListening();
-      sendToBackend(textInput); // Send the recorded text to the backend
+      // Removed the sendToBackend call from here
     }
   };
 
