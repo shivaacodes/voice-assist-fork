@@ -83,7 +83,7 @@ const Feature = () => {
             onMouseLeave={() => setHovered(false)}
           >
             <div className="flex justify-center items-center mt-20  h-[200px] w-[300px]">
-              <video src="/zuhivid.mp4" autoPlay loop></video>
+              <video src="/images/zuhivid.mp4" autoPlay loop></video>
             </div>
             <AnimatePresence>
               {hovered && (

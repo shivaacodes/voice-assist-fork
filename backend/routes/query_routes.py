@@ -23,7 +23,7 @@ def handle_query():
 
     try:
         # Fetch all queries from Supabase
-        response = supabase.table("faq2").select("query, answer").execute()
+        response = supabase.table("faq3").select("query, answer").execute()
         if not response.data:
             return jsonify({"error": "No FAQs found in the database"}), 500
 

@@ -1,6 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { FileText, Mic } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Hero = () => {
   const scrollToSection = (id) => {
@@ -24,16 +24,21 @@ const Hero = () => {
             />
           </div>
 
-          <span className="mt-4 sm:mt-6 block bg-gradient-to-r from-blue-400 via-blue-500 to-blue-800 bg-clip-text text-transparent font-bold">
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="mt-4 sm:mt-6 block bg-gradient-to-r from-blue-400 via-blue-500 to-blue-800 bg-clip-text text-transparent font-extrabold"
+          >
             Seamless Admissions, Smart Solutions – Your Campus IT Wingman!
-          </span>
+          </motion.span>
         </h1>
       </div>
 
       {/* Right Side Buttons */}
       <div className="flex flex-col gap-8 mt-48">
         <button
-          onClick={() => scrollToSection("main")} // Use lowercase "main"
+          onClick={() => scrollToSection("main")}
           className="px-6 py-3 rounded-xl font-bold text-white text-lg sm:text-xl
           bg-blue-600 hover:bg-blue-700 transition-all duration-150
           flex items-center justify-center shadow-md"
@@ -43,7 +48,7 @@ const Hero = () => {
         </button>
 
         <button
-          onClick={() => scrollToSection("aifeature")} // Use lowercase "aifeature"
+          onClick={() => scrollToSection("aifeature")}
           className="px-6 py-3 rounded-xl font-bold text-white text-lg sm:text-xl
           bg-green-600 hover:bg-green-700 transition-all duration-150
           flex items-center justify-center shadow-md"
