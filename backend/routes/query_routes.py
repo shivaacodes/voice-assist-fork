@@ -31,7 +31,7 @@ def handle_query():
 
         # Search for a match in Supabase
         match_response = (
-            supabase.table("faq")
+            supabase.table("faq2")
             .select("answer")
             .ilike("query", f"%{processed_query}%")
             .execute()
