@@ -1,17 +1,13 @@
-from flask import Blueprint, request, jsonify, send_file
+# routes/query_routes.py
+from flask import Blueprint, request, jsonify
 from services.db_service import get_supabase_client
 from services.tts_service import generate_tts
-import re
+from services.query_matcher import match_query
 import os
 import base64
 
 query_bp = Blueprint("query", __name__)
 supabase = get_supabase_client()
-
-
-def preprocess_text(text):
-    """Preprocess text: lowercase, remove punctuation"""
-    return re.sub(r"[^\w\s]", "", text.lower().strip())
 
 
 @query_bp.route("/query", methods=["POST"])
@@ -26,20 +22,18 @@ def handle_query():
     print(f"Received query: {user_query}")
 
     try:
-        # Preprocess the user query
-        processed_query = preprocess_text(user_query)
+        # Fetch all queries from Supabase
+        response = supabase.table("faq2").select("query, answer").execute()
+        if not response.data:
+            return jsonify({"error": "No FAQs found in the database"}), 500
 
-        # Search for a match in Supabase
-        match_response = (
-            supabase.table("faq2")
-            .select("answer")
-            .ilike("query", f"%{processed_query}%")
-            .execute()
-        )
+        stored_queries = response.data
+
+        # Find a match using token-based matching
+        answer = match_query(user_query, stored_queries)
 
         # Determine the answer
-        if match_response.data:
-            answer = match_response.data[0]["answer"]
+        if answer:
             print(f"Matched answer: {answer}")
         else:
             answer = "I'm sorry, I don't understand. Can you rephrase?"
