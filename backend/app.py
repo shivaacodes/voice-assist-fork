@@ -4,7 +4,7 @@ from routes.tts_routes import tts_bp
 from routes.query_routes import query_bp
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)
 
 # Register Blueprints
 app.register_blueprint(tts_bp, url_prefix='/api')

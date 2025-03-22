@@ -43,7 +43,7 @@ const Main = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:5000/query", {
+      const response = await fetch("http://127.0.0.1:5000/api/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: text }),
@@ -151,8 +151,8 @@ const Main = () => {
               <Textarea
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
-                placeholder="Type your message to Zuhi here..."
-                className="min-h-[400px] text-lg text-gray-700 bg-white border border-blue-600 rounded-lg p-4 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all duration-300"
+                placeholder="Hello! How can I assist you today?"
+                className="min-h-[400px] text-gray-700 bg-white border border-blue-600 rounded-lg p-4 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all duration-300"
               />
               <button
                 onClick={() => sendToBackend(textInput)}
