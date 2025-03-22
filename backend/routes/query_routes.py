@@ -1,6 +1,14 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file, Response  # Added Response import
 from services.db_service import get_supabase_client
+from services.tts_service import generate_tts
 import re
+import io
+import base64
+
+
+
+tts_bp = Blueprint('tts', __name__)
+
 
 query_bp = Blueprint("query", __name__)
 supabase = get_supabase_client()
@@ -25,7 +33,6 @@ def handle_query():
     try:
         # Fetch all queries from the database
         response = supabase.table("faq").select("query, answer").execute()
-        # Debugging: Check what queries are in the DB
         stored_queries = [q["query"] for q in response.data]
         print("Stored Queries in DB:", stored_queries)
 
@@ -45,22 +52,31 @@ def handle_query():
             .execute()
         )
 
-        # Debugging: Print the response from Supabase
         print("Supabase Response:", match_response.data)
 
         if match_response.data:
             answer = match_response.data[0]["answer"]
-            # Print the answer to the command line
             print(f"Matched answer: {answer}")
 
-            # Create the response object to log and return
-            response_obj = {"response": answer}
+            # Generate TTS audio (assuming it returns raw audio data)
+            audio_data = generate_tts(answer)
+            
+            # Encode the audio data to base64 to send as JSON
+            audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+
+            # Send both the text and the audio as base64 in the JSON response
+            response_obj = {
+                "response": answer,
+                "audio": audio_base64
+            }
             print("Sending response to client:", response_obj)
+
             return jsonify(response_obj)
 
         # No match found response
         response_obj = {
-            "response": "I'm sorry, I don't understand. Can you rephrase?"}
+            "response": "I'm sorry, I don't understand. Can you rephrase?"
+        }
         print("Sending response to client (no match):", response_obj)
         return jsonify(response_obj)
 

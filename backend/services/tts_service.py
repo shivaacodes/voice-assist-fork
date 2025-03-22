@@ -7,12 +7,10 @@ from config import HUME_API_KEY, TTS_OUTPUT_FOLDER
 HUME_TTS_URL = "https://api.hume.ai/v0/tts"
 
 # Ensure the output folder exists
-os.makedirs(TTS_OUTPUT_FOLDER, exist_ok=True)
-
 
 def generate_tts(text):
     """
-    Convert text to speech using Hume API and save as an MP3 file.
+    Convert text to speech using Hume API and return audio data as bytes.
     """
     headers = {
         "Authorization": f"Bearer {HUME_API_KEY}",
@@ -29,17 +27,12 @@ def generate_tts(text):
         response = requests.post(HUME_TTS_URL, json=data, headers=headers)
 
         if response.status_code == 200:
-            # Generate a unique filename to prevent overwriting
-            output_filename = f"{uuid.uuid4()}.mp3"
-            output_path = os.path.join(TTS_OUTPUT_FOLDER, output_filename)
-
-            # Save the MP3 file
-            with open(output_path, "wb") as f:
-                f.write(response.content)
-
-            return output_path
+            # Return audio data directly in bytes
+            return response.content
         else:
-            return f"Error: {response.json().get('message', 'Unknown error')}"
+            # Return error message as bytes for logging
+            return f"Error: {response.json().get('message', 'Unknown error')}".encode()
 
     except requests.exceptions.RequestException as e:
-        return f"Exception: {str(e)}"
+        # Return exception message as bytes for logging
+        return f"Exception: {str(e)}".encode()
