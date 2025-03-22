@@ -25,7 +25,6 @@ def handle_query():
     try:
         # Fetch all queries from the database
         response = supabase.table("faq").select("query, answer").execute()
-
         # Debugging: Check what queries are in the DB
         stored_queries = [q["query"] for q in response.data]
         print("Stored Queries in DB:", stored_queries)
