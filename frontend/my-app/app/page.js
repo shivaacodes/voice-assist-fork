@@ -4,6 +4,7 @@ import Hero from "@/components/costum/Hero";
 import Statement from "@/components/costum/Statement";
 import Feature from "@/components/costum/Feature";
 import Main from "@/components/costum/Main";
+import AiFeature from "@/components/costum/AiFeature";
 
 export default function Home() {
   return (
@@ -17,7 +18,12 @@ export default function Home() {
       <div className="mb-16">
         <Feature />
       </div>
-      <Main />
+      <div id="main" className="mb-12">
+        <Main />
+      </div>
+      <div id="aifeature" className="mb-16">
+        <AiFeature />
+      </div>
     </div>
   );
 }
