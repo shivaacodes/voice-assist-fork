@@ -30,7 +30,10 @@ const Main = () => {
 
     if (!isRecording) {
       // Start listening
-      SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
+      SpeechRecognition.startListening({
+        continuous: false,
+        language: "en-IN",
+      });
     } else {
       // Stop listening and send the query
       SpeechRecognition.stopListening();

@@ -8,7 +8,7 @@ import Main from "@/components/costum/Main";
 export default function Home() {
   return (
     <div className="relative w-full flex flex-col items-center">
-      <div className="mb-40">
+      <div className="mb-34">
         <Hero />
       </div>
       <div className="mb-16">
