@@ -1,8 +1,7 @@
 
-**AI-Powered Campus Assistance**
+# AI-Powered Campus Assistance
 
 Built at Hack_Europa, Zuhi is an intelligent conversational platform designed to revolutionize the student admission experience. Leveraging Hume API for emotional understanding, Octave TTS for speech, Gemini AI for reasoning, and lightweight NLP models, Zuhi ensures a natural, responsive interaction between institutions and applicants.
-
 
 ## Features
 
@@ -15,8 +14,6 @@ Built at Hack_Europa, Zuhi is an intelligent conversational platform designed to
 • Smart Form Generation – Auto-fills application forms based on user responses.
 
 • PDF Export – Generates a downloadable application form instantly.
-
-
 
 ## Screenshots
 
